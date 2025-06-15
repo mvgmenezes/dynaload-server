@@ -11,10 +11,10 @@ public class SocketServer {
 
     public void start(int port) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("[Dynaload Server] SocketServer started on port " + port);
+            System.out.println("[Dynaload] Server started on port " + port);
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("[Dynaload Server] Receiving request from: " + socket.getInetAddress());
+                System.out.println("[Dynaload] Receiving request from: " + socket.getInetAddress());
                 new Thread(() -> handleClient(socket)).start();
             }
         } catch (IOException e) {
@@ -33,7 +33,7 @@ public class SocketServer {
                 try {
                     command = receivedClient.readUTF();
                 } catch (EOFException eof) {
-                    System.out.println("[Dynaload Server] Client closed connection.");
+                    System.out.println("[Dynaload] Client closed connection.");
                     break;
                 }
 
@@ -43,7 +43,7 @@ public class SocketServer {
                     case "LIST_CLASSES" -> handleListClasses(sendClient);
                     case "CLOSE" -> {
                         sendClient.writeUTF("CLOSED");
-                        System.out.println("[Dynaload Server] Client requested close.");
+                        System.out.println("[Dynaload] Client requested close.");
                         return;
                     }
                     default -> sendClient.writeUTF("UNKNOWN_COMMAND");
@@ -51,12 +51,12 @@ public class SocketServer {
             }
 
         } catch (Exception e) {
-            System.out.println("[Dynaload Server] Error: " + e.getMessage());
+            System.err.println("[Dynaload] Error: " + e.getMessage());
         }
     }
 
     private void handleListClasses(DataOutputStream out) throws IOException {
-        var classes = ClassScanner.getRegisteredPaths();
+        var classes = ClassScanner.getRegisteredKeys();
         out.writeInt(classes.size());
         for (String path : classes) {
             out.writeUTF(path);
