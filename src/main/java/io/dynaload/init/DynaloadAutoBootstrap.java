@@ -1,4 +1,4 @@
-package io.dynaload.initial;
+package io.dynaload.init;
 
 import io.dynaload.Dynaload;
 import io.dynaload.annotations.DynaloadStart;

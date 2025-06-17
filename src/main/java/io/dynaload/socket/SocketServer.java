@@ -1,7 +1,7 @@
-package io.dynaload.core.socket;
+package io.dynaload.socket;
 
 
-import io.dynaload.core.scan.ClassScanner;
+import io.dynaload.scan.ClassScanner;
 
 import java.io.*;
 import java.net.ServerSocket;

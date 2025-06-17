@@ -1,7 +1,7 @@
 package io.dynaload;
 
-import io.dynaload.core.scan.ClassScanner;
-import io.dynaload.core.socket.SocketServer;
+import io.dynaload.scan.ClassScanner;
+import io.dynaload.socket.SocketServer;
 
 
 public class Dynaload {
