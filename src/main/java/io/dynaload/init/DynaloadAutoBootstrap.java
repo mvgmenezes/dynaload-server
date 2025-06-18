@@ -22,8 +22,9 @@ public class DynaloadAutoBootstrap {
             if (startClass != null) {
                 DynaloadStart annotation = startClass.getAnnotation(DynaloadStart.class);
                 int port = annotation.port();
+                String basePackages = annotation.basePackage();
                 System.out.println("[Dynaload] Starting Dynaload Server...");
-                Dynaload.start(port);
+                Dynaload.start(port, basePackages);
             }else{
                 System.err.println("[Dynaload] Warning: No class annotated with @DynaloadStart was found. Dynaload server will not start.");
             }
