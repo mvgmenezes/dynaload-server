@@ -28,7 +28,8 @@ public class CallableScanner {
 
                 for (Method method : clazz.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(DynaloadCallable.class)) {
-                        String methodId = generateMethodId(clazz, method);
+//                        String methodId = generateMethodId(clazz, method);
+                        String methodId = generateMethodIdFromInterface(clazz, method);
                         CallableRegistry.register(methodId, method, instance);
                         System.out.println("[Dynaload] Callable registered: " + methodId + " - service: " + clazz.getName());
                     }
@@ -42,6 +43,15 @@ public class CallableScanner {
 
     private static String generateMethodId(Class<?> clazz, Method method) {
         String className = clazz.getSimpleName();
-        return Character.toLowerCase(className.charAt(0)) + className.substring(1) + "." + method.getName();
+        return Character.toLowerCase(className.charAt(0)) + className.substring(1) + "::" + method.getName();
+    }
+
+    private static String generateMethodIdFromInterface(Class<?> implClass, Method method) {
+        Class<?>[] interfaces = implClass.getInterfaces();
+        if (interfaces.length == 0) {
+            throw new IllegalStateException("No interface found for " + implClass.getName());
+        }
+        String interfaceName = interfaces[0].getSimpleName(); // ex: IAccountService
+        return Character.toLowerCase(interfaceName.charAt(0)) + interfaceName.substring(1) + "::" + method.getName();
     }
 }

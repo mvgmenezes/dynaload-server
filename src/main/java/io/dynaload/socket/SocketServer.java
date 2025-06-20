@@ -5,11 +5,10 @@ import io.dynaload.frame.Frame;
 import io.dynaload.frame.FrameDispatcher;
 import io.dynaload.frame.FrameReader;
 import io.dynaload.frame.FrameWriter;
-import io.dynaload.scan.callable.CallableRegistry;
-import io.dynaload.scan.export.ClassExportScanner;
+import io.dynaload.util.DynaloadCodes;
+import io.dynaload.util.DynaloadOpCodes;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -49,17 +48,21 @@ public class SocketServer {
                     break; // Sai do loop, vai para o finally
                 }
 
-                if (frame.opCode == 0x02) { // INVOKE mantém conexão
+                if (frame.opCode == DynaloadOpCodes.INVOKE) { // INVOKE mantém conexão
                     executor.submit(() -> {
                         Frame response = dispatcher.dispatch(frame);
                         try {
                             FrameWriter.writeFrame(out, response);
-                        } catch (IOException e) {
+                        } catch (Exception e) {
+                            sendFramingError(out, e);
                             System.err.println("[Dynaload] Failed to write response: " + e.getMessage());
                         }
                     });
+                } else if (frame.opCode == DynaloadOpCodes.GET_CLASS) { // INVOKE mantém conexão
+                    Frame response = dispatcher.dispatch(frame);
+                    FrameWriter.writeFrame(out, response);
                 } else {
-                    // Tratamento para GET_CLASS, LIST_CLASSES, PING - fecha após resposta
+                    // Tratamento para LIST_CLASSES, PING - fecha após resposta
                     Frame response = dispatcher.dispatch(frame);
                     FrameWriter.writeFrame(out, response);
                     break;
@@ -82,9 +85,9 @@ public class SocketServer {
             oos.writeObject("Invalid header: " + e.getMessage());
             byte[] payload = payloadBuffer.toByteArray();
 
-            dout.writeShort(0xCAFE);        // magic
+            dout.writeShort(DynaloadCodes.MAGIC_HEADER);        // magic
             dout.writeInt(-1);              // requestId inválido
-            dout.writeByte(0x7F);           // opCode reservado para erro de framing
+            dout.writeByte(DynaloadOpCodes.ERROR);           // opCode reservado para erro de framing
             dout.writeInt(payload.length);  // tamanho do payload
             dout.write(payload);
             dout.flush();

@@ -4,8 +4,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static io.dynaload.util.DynaloadCodes.MAGIC_HEADER;
+
 public class FrameWriter {
-    private static final short MAGIC_HEADER = (short) 0xCAFE;
 
     public static void writeFrame(OutputStream out, Frame frame) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(out);

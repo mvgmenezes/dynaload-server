@@ -1,10 +1,10 @@
 package io.dynaload.model.test;
 
-import io.dynaload.annotations.DynaloadCallable;
-import io.dynaload.annotations.DynaloadService;
-
-import java.util.List;
+//import io.dynaload.annotations.DynaloadCallable;
+//import io.dynaload.annotations.DynaloadService;
 //
+//import java.util.List;
+
 //@DynaloadService
 //public class AccountService {
 //

@@ -1,12 +1,12 @@
 package io.dynaload.frame;
 
+import io.dynaload.util.DynaloadOpCodes;
 import io.dynaload.scan.callable.CallableRegistry;
 import io.dynaload.scan.export.ClassExportScanner;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.lang.reflect.Modifier;
+
 
 public class FrameDispatcher {
 
@@ -17,15 +17,21 @@ public class FrameDispatcher {
             byte[] payload = frame.payload;
 
             return switch (opCode) {
-                case 0x01 -> handleGetClass(payload, requestId);
-                case 0x02 -> handleInvoke(payload, requestId);
-                case 0x03 -> handleListClasses(requestId);
+                case DynaloadOpCodes.GET_CLASS -> handleGetClass(payload, requestId);
+                case DynaloadOpCodes.INVOKE -> handleInvoke(payload, requestId);
+                case DynaloadOpCodes.LIST_CLASSES -> handleListClasses(requestId);
+                case DynaloadOpCodes.PING -> handlePing(requestId);        // ping
+                case DynaloadOpCodes.CLOSE -> handleClose(requestId);
                 default -> Frame.error(requestId, "Unknown opCode: " + opCode);
             };
         } catch (Exception e) {
             e.printStackTrace();
             return Frame.error(frame.requestId, e.getMessage());
         }
+    }
+
+    private Frame handlePing(int requestId) {
+        return Frame.success(requestId, DynaloadOpCodes.PONG, new byte[0]); // resposta PING
     }
 
     private Frame handleGetClass(byte[] payload, int requestId) {
@@ -45,7 +51,7 @@ public class FrameDispatcher {
                 out.write(bytecode);
             }
 
-            return Frame.success(requestId, (byte) 0x11, bout.toByteArray());
+            return Frame.success(requestId, DynaloadOpCodes.GET_CLASS_RESPONSE, bout.toByteArray());
 
         } catch (Exception e) {
             return Frame.error(requestId, e.getMessage());
@@ -62,7 +68,14 @@ public class FrameDispatcher {
             }
 
             var method = CallableRegistry.getMethod(methodId);
+            if (method == null) {
+                return Frame.error(requestId, "Method not found: " + methodId);
+            }
+
             var instance = CallableRegistry.getInstance(methodId);
+            if (instance == null && !Modifier.isStatic(method.getModifiers())) {
+                return Frame.error(requestId, "Instance not registered: " + methodId);
+            }
             Object result = method.invoke(instance, args);
 
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -71,7 +84,7 @@ public class FrameDispatcher {
                 out.writeObject(result);
             }
 
-            return Frame.success(requestId, (byte) 0x20, bout.toByteArray());
+            return Frame.success(requestId, DynaloadOpCodes.INVOKE_RESPONSE, bout.toByteArray());
 
         } catch (Exception e) {
             return Frame.error(requestId, e.getMessage());
@@ -90,7 +103,19 @@ public class FrameDispatcher {
                 }
             }
 
-            return Frame.success(requestId, (byte) 0x30, bout.toByteArray());
+            return Frame.success(requestId, DynaloadOpCodes.LIST_CLASSES_RESPONSE, bout.toByteArray());
+        } catch (Exception e) {
+            return Frame.error(requestId, e.getMessage());
+        }
+    }
+
+    private Frame handleClose(int requestId) {
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            try (DataOutputStream out = new DataOutputStream(bout)) {
+                out.writeUTF("CLOSED");
+            }
+            return Frame.success(requestId, DynaloadOpCodes.CLOSED_RESPONSE, bout.toByteArray());
         } catch (Exception e) {
             return Frame.error(requestId, e.getMessage());
         }

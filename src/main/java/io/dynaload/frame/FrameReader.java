@@ -5,8 +5,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static io.dynaload.util.DynaloadCodes.MAGIC_HEADER;
+
 public class FrameReader {
-    private static final short MAGIC_HEADER = (short) 0xCAFE;
 
     public static Frame readFrame(InputStream in) throws IOException {
         DataInputStream dataIn = new DataInputStream(in);
