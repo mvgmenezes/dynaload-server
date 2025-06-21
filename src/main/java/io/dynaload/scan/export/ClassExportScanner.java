@@ -30,7 +30,7 @@ public class ClassExportScanner {
                     // 1. Registra dependências primeiro
                     for (Class<?> dep : export.includeDependencies()) {
                         if (registered.add(dep)) {
-                            System.out.println("[Dynaload] Export Dependency registered: " + dep.getName());
+                            System.out.println("[Dynaload] Export Dependency: " + dep.getName() + " - class: " + dep.getName());
                             register(dep.getName(), dep);
                         }
                     }
@@ -41,7 +41,7 @@ public class ClassExportScanner {
                         if(export.value() == null || export.value().isBlank() || export.value().isEmpty()){
                             key = clazz.getName();
                         }
-                        System.out.println("[Dynaload] Export Class registered: " + key + " - class: " + clazz.getName());
+                        System.out.println("[Dynaload] Export Class : " + key + " - class: " + clazz.getName());
                         register(key, clazz);
                     }
                 }

@@ -6,6 +6,9 @@ import io.dynaload.scan.export.ClassExportScanner;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class FrameDispatcher {
@@ -34,6 +37,29 @@ public class FrameDispatcher {
         return Frame.success(requestId, DynaloadOpCodes.PONG, new byte[0]); // resposta PING
     }
 
+//    private Frame handleGetClass(byte[] payload, int requestId) {
+//        try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload))) {
+//            String path = in.readUTF();
+//            Class<?> clazz = ClassExportScanner.get(path);
+//            if (clazz == null)
+//                return Frame.error(requestId, "Class not found: " + path);
+//
+//            String classResource = clazz.getName().replace('.', '/') + ".class";
+//            byte[] bytecode = clazz.getClassLoader().getResourceAsStream(classResource).readAllBytes();
+//
+//            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//            try (DataOutputStream out = new DataOutputStream(bout)) {
+//                out.writeUTF(clazz.getName());
+//                out.writeInt(bytecode.length);
+//                out.write(bytecode);
+//            }
+//
+//            return Frame.success(requestId, DynaloadOpCodes.GET_CLASS_RESPONSE, bout.toByteArray());
+//
+//        } catch (Exception e) {
+//            return Frame.error(requestId, e.getMessage());
+//        }
+//    }
     private Frame handleGetClass(byte[] payload, int requestId) {
         try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload))) {
             String path = in.readUTF();
@@ -42,7 +68,19 @@ public class FrameDispatcher {
                 return Frame.error(requestId, "Class not found: " + path);
 
             String classResource = clazz.getName().replace('.', '/') + ".class";
-            byte[] bytecode = clazz.getClassLoader().getResourceAsStream(classResource).readAllBytes();
+
+            byte[] bytecode;
+            InputStream resourceStream = clazz.getClassLoader().getResourceAsStream(classResource);
+            if (resourceStream != null) {
+                bytecode = resourceStream.readAllBytes();
+            } else {
+                // tenta carregar da pasta build/dynaload manualmente
+                Path diskPath = Paths.get("build/dynaload", classResource);
+                if (!Files.exists(diskPath)) {
+                    return Frame.error(requestId, "Bytecode not found for: " + clazz.getName());
+                }
+                bytecode = Files.readAllBytes(diskPath);
+            }
 
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             try (DataOutputStream out = new DataOutputStream(bout)) {

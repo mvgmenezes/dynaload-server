@@ -10,7 +10,7 @@ public class DynaloadAutoBootstrap {
     public static void init() {
         try (ScanResult scanResult = new ClassGraph()
                 .enableAllInfo()
-                .acceptPackages("") // escaneia tudo
+                .acceptPackages("io.dynaload")
                 .scan()) {
 
             Class<?> startClass = scanResult.getClassesWithAnnotation("io.dynaload.annotations.DynaloadStart")

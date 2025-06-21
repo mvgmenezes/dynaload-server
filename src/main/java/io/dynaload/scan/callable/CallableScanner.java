@@ -28,10 +28,10 @@ public class CallableScanner {
 
                 for (Method method : clazz.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(DynaloadCallable.class)) {
-//                        String methodId = generateMethodId(clazz, method);
-                        String methodId = generateMethodIdFromInterface(clazz, method);
+                        String methodId = generateMethodId(clazz, method);
+//                        String methodId = generateMethodIdFromInterface(clazz, method);
                         CallableRegistry.register(methodId, method, instance);
-                        System.out.println("[Dynaload] Callable registered: " + methodId + " - service: " + clazz.getName());
+                        System.out.println("[Dynaload] Export Method: " + methodId + " from service: " + clazz.getName());
                     }
                 }
             }
