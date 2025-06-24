@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface DynaloadStart {
     int port() default 9999;
+    String basePackage(); // novo
 }

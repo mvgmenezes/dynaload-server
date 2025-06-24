@@ -10,7 +10,7 @@ public class DynaloadAutoBootstrap {
     public static void init() {
         try (ScanResult scanResult = new ClassGraph()
                 .enableAllInfo()
-                .acceptPackages("") // escaneia tudo
+                .acceptPackages("io.dynaload")
                 .scan()) {
 
             Class<?> startClass = scanResult.getClassesWithAnnotation("io.dynaload.annotations.DynaloadStart")
@@ -22,8 +22,9 @@ public class DynaloadAutoBootstrap {
             if (startClass != null) {
                 DynaloadStart annotation = startClass.getAnnotation(DynaloadStart.class);
                 int port = annotation.port();
+                String basePackages = annotation.basePackage();
                 System.out.println("[Dynaload] Starting Dynaload Server...");
-                Dynaload.start(port);
+                Dynaload.start(port, basePackages);
             }else{
                 System.err.println("[Dynaload] Warning: No class annotated with @DynaloadStart was found. Dynaload server will not start.");
             }

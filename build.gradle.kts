@@ -21,6 +21,7 @@ repositories {
 dependencies {
     dependencies {
         implementation("io.github.classgraph:classgraph:4.8.165")
+        implementation("net.bytebuddy:byte-buddy:1.17.6")
         implementation("io.dynaload:dynaload-server:1.0-SNAPSHOT")
     }
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -37,6 +38,8 @@ tasks.jar {
     }
 
     from(sourceSets.main.get().output)
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     //(fat jar):
 //    dependsOn(configurations.runtimeClasspath)
