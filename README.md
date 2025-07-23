@@ -10,7 +10,7 @@ Dynaload allows Java applications to **export models, services, and methods** th
 
 ---
 
-## ⚙Use Cases
+## Use Cases
 
 * Plugin-based systems with dynamic code loading
 * Microservice-to-microservice RPC without HTTP
